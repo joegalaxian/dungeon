@@ -51,8 +51,8 @@ def action_key(k, m, p):
 			new_x = px-1
 			new_y = py
 			p = (new_x, new_y)
-			print p
-			terminate()
+			#print p
+			#terminate()
 			#m[px][py] = '.'
 			#m[new_x][new_y] = 'P'
 
@@ -105,6 +105,39 @@ def chararray_map(m):
 			read_key()
 	return cm
 
+# Loads map from file.
+def load_map(level):
+	map_file_path = 'maps/' + str(level) + '.map'
+	map_file = open(map_file_path, 'r')
+	m = map_file.readlines()
+	map_file.close()
+	return m
+
+def load_map_as_dict(m):
+	m_dict = {}
+	mx = len(m)
+	my = len(m[0])
+	print 'mx,my: ', mx, my
+	for x in range(len(m)):
+		for y in range(len(m[0])-1):
+			m_dict[(x,y)] = m[x][y]
+	print m_dict
+	return m_dict
+
+def render_map_dict(m_dict):
+	x = 0
+	y = 0
+	for (xi,yi) in m_dict:	
+		if x < xi:
+			x = xi
+		if y < yi:
+			y = yi
+	for xi in range(x+1):
+		for yi in range(y+1):
+			print m_dict[(xi,yi)],
+		print ''
+
+# Main function.
 def main():
 	key = None
 	level = 0
@@ -118,10 +151,11 @@ def main():
 		level_completed = False
 		
 		# Read map from file.
-		map_file_path = 'maps/' + str(level) + '.map'
-		map_file = open(map_file_path, 'r')
-		map = map_file.readlines()
-		map_file.close()
+		map = load_map(level)
+
+		map_dict = load_map_as_dict(map)
+		render_map_dict(map_dict)
+		#terminate()
 
 		# Map dimensions.
 		map_x = len(map[0])-1-1
