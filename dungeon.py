@@ -1,24 +1,15 @@
+# My modules.
 import graph as g
-import numpy as np # To use chararray.
 
-# Import for the key press
+# Import for chararray.
+# import numpy as np
+
+# Import for the key press.
 import sys
 import termios
 import tty
 
-"""
-W=119,87
-A=97,65
-S=115,83
-D=100,68
-ENTER=13
-Y=121,89
-N=110,78
-ESC=27
-SPACE=32
-TAB=9
-"""
-# Key values
+# Key values constants.
 KEY_ESC		= (27, 113, 81)
 KEY_UP		= (119, 87)
 KEY_LEFT	= (115, 83)
@@ -31,6 +22,7 @@ KEY_SPACE	= (32)
 KEY_TAB		= (9)
 KEY_HELP	= (104,72)
 
+# Returns int value of key pressed.
 def read_key():
 	# Config the keyboard as raw to read key press.
 	attr = termios.tcgetattr(sys.stdin)
@@ -39,6 +31,7 @@ def read_key():
 	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, attr)
 	return ord(c[0])
 
+# Action key (i.e. move player, help menu, quit game, etc).
 def action_key(k, m, p):
 	# If ESC, Q, q pressed then terminate:
 	if k in KEY_ESC:
@@ -79,17 +72,20 @@ def action_key(k, m, p):
 		#print "Press any key to resume game."
 		#read_key()
 
-def terminate():
-	# termios.tcsetattr(sys.stdin, termios.TCSADRAIN, attr)
-	print "Game terminated."
+# Terminates game printing a message, 'Game terminated.' by default.
+def terminate(str = "Game terminated."):
+	print str
 	quit()
 
+# Returns position (x,y) of the player on the map.
 def locate_player(m):
 	for x in range(len(m)):
 		for y in range(len(m[0])):
 			if m[x][y] == 'P':
 				return (x,y)
 
+"""
+# UNUSED
 def chararray_map(m):
 	mx = len(m[0])-1-1
 	my = len(m)-1
@@ -104,8 +100,9 @@ def chararray_map(m):
 			cm[x][y] = m[mx][my]
 			read_key()
 	return cm
+"""
 
-# Loads map from file.
+# Loads map as list of strings from file.
 def load_map(level):
 	map_file_path = 'maps/' + str(level) + '.map'
 	map_file = open(map_file_path, 'r')
@@ -113,20 +110,23 @@ def load_map(level):
 	map_file.close()
 	return m
 
+# Loads map as dictionary from list of strings. Dictionary structure: m{(x,y): 'c'}
 def load_map_as_dict(m):
 	m_dict = {}
 	mx = len(m)
 	my = len(m[0])
-	print 'mx,my: ', mx, my
+	#print 'DEBUG mx,my: ', mx, my
 	for x in range(len(m)):
 		for y in range(len(m[0])-1):
 			m_dict[(x,y)] = m[x][y]
-	print m_dict
+	#print 'DEBUG %r' % m_dict
 	return m_dict
 
+# Todo: move this to grahp.py
 def render_map_dict(m_dict):
-	x = 0
-	y = 0
+	(x,y) = (0,0)
+	#x = 0
+	#y = 0
 	for (xi,yi) in m_dict:	
 		if x < xi:
 			x = xi
@@ -152,20 +152,11 @@ def main():
 		
 		# Read map from file.
 		map = load_map(level)
-
 		map_dict = load_map_as_dict(map)
-		render_map_dict(map_dict)
-		#terminate()
 
 		# Map dimensions.
 		map_x = len(map[0])-1-1
 		map_y = len(map)-1
-
-		############
-		#charmap = chararray_map(map)
-		#print "charmap: %r" % cm
-		#quit()
-		############
 
 		# Locate player on map.
 		player = locate_player(map)
@@ -181,8 +172,9 @@ def main():
 			print "key.......:", key
 			print "player....:", player
 			print "time......:", time
-			g.print_map(map)
-
+			#g.print_map(map)
+			render_map_dict(map_dict)
+			
 			# Read and action key:
 			action_key(key, map, player)
 			key = read_key()
