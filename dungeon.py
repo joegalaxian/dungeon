@@ -1,4 +1,4 @@
-# My modules.
+# My modules.i
 import graph as g
 
 # Import for chararray.
@@ -12,15 +12,35 @@ import tty
 # Key values constants.
 KEY_ESC		= (27, 113, 81)
 KEY_UP		= (119, 87)
-KEY_LEFT	= (115, 83)
-KEY_DOWN	= (100, 68)
+KEY_LEFT	= (97, 65)
+KEY_DOWN	= (115, 83)
 KEY_RIGHT	= (100, 68)
 KEY_ENTER	= (13)
 KEY_YES		= (121, 89)
 KEY_NO		= (110, 78)
-KEY_SPACE	= (32)
-KEY_TAB		= (9)
+KEY_SPACE	= (32, None) #Hack: None added for using "in KEY_SPACE"
+KEY_TAB		= (9, None)
 KEY_HELP	= (104,72)
+KEY_LEVEL	= (108,76)
+
+class Level(object):
+	def __init__(self, floor=1):
+		self.floor = floor
+		m = load_map(floor)
+		self.map_dict = load_map_as_dict(m)
+		self.player = get_key(self.map_dict, 'P')
+		self.switch = get_key(self.map_dict, 's')
+		self.completed = False
+		self.switch_pressed = False
+
+	def player(self):
+		return get_key(self.map_dict, 'P')
+
+	def map_size(self):
+		return '(TO,DO)'
+
+	def action_key(self, key):
+		action_key(key, self.map_dict)
 
 # Returns int value of key pressed.
 def read_key():
@@ -31,44 +51,66 @@ def read_key():
 	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, attr)
 	return ord(c[0])
 
+def new_position((x,y), k):
+	if k in KEY_UP:
+		return (x-1,y)
+	elif k in KEY_DOWN:
+		return (x+1,y)
+	elif k in KEY_LEFT:
+		return (x,y-1)
+	elif k in KEY_RIGHT:
+		return (x,y+1)
+
 # Action key (i.e. move player, help menu, quit game, etc).
 def action_key(k, m):
+	switch = get_key(m, 's')
 	px, py = get_key(m, 'P')
 
 	# If ESC, Q, q pressed then terminate:
 	if k in KEY_ESC:
 		terminate()
 
+	# If hit the wall then ring.
+	if k in (KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT):	
+		nx, ny = new_position((px,py), k)
+
+		if m[nx,ny] == 'X':
+			print '\a'
+		elif m[nx,ny] == '_':
+			print "Passed!"
+		else:
+			None
+
 	# If KEY_UP:
 	if k in KEY_UP:
-		# If hitted a wall then ring bell.
-		if m[px-1, py] == 'X':
-			print '\a'
-		# If empty space then move there.
-		elif m[px-1, py] == '.':
+		if m[px-1, py] == '.':
 			m[px-1, py] = 'P'
 			m[px, py] = '.'
-
+	
 	# KEY_LEFT:
 	if k in KEY_LEFT:
+		# If empty space then move there.
 		if m[px, py-1] == '.':
 			m[px, py-1] = 'P'
 			m[px, py] = '.'
 
 	# KEY_DOWN:
 	if k in KEY_DOWN:
+		# If empty space then move there.
 		if m[px+1,py] == '.':
 			m[px+1,py] = 'P'
 			m[px,py] = '.'	
-	
+
 	# KEY_RIGHT:
 	if k in KEY_RIGHT:
+		# If empty space then move there.
 		if m[px,py+1] == '.':
 			m[px,py+1] = 'P'
 			m[px,py] = '.'
 
 	# KEY_SPACE:
-		# Wait a turn.
+	if k in KEY_SPACE:
+		return	# Wait a turn.
 
 	# KEY_YES:
 
@@ -84,6 +126,9 @@ def action_key(k, m):
 		print "Wait a turn with SPACE."
 		#print "Press any key to resume game."
 		#read_key()
+
+	else:
+		None
 
 # Terminates game printing a message, 'Game terminated.' by default.
 def terminate(str = "Game terminated."):
@@ -143,45 +188,36 @@ def render_map_dict(m_dict):
 # Main function.
 def main():
 	key = None
-	level = 0
 	time = 0
-	# player = (None, None) # coordenates
+	floor = 0
 
 	# Game main loop
 	while True:
 
 		# Load new level:
-		level += 1
-		level_completed = False
-
-		# Read map from file.
-		map = load_map(level)
-		map_dict = load_map_as_dict(map)
-
-		# Map dimensions.
-		map_x = len(map[0])-1-1
-		map_y = len(map)-1
+		floor += 1
+		level = Level(floor)
 
 		# Loop on level.
-		while not level_completed:
-
-			# Locate player on map.
-			player = get_key(map_dict, 'P')
+		while not level.completed:
 
 			# Render game:
 			g.clear()
 			print "Dungeon.py v01"
-			print "level.....:", level
-			print "map_size..:", (map_x, map_y)
-			print "key.......:", key
-			print "player....:", player
 			print "time......:", time
-			g.render_map_dict(map_dict)
+			print "floor.....:", level.floor
+			print "player....:", get_key(level.map_dict, 'P')
+			print "key.......:", key
+			#print "map_size..:", level.map_size()
+			g.render_map_dict(level.map_dict)
 			
 			# Read and action key:
 			key = read_key()
-			action_key(key, map_dict)
+			#action_key(key, level.map_dict)
+			level.action_key(key)
 			time += 1
+			
+			if key in KEY_LEVEL: level.completed = True
 
 if __name__ == '__main__':	
 	main()
