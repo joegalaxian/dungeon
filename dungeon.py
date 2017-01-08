@@ -23,6 +23,71 @@ KEY_TAB		= (9, None)
 KEY_HELP	= (104,72)
 KEY_LEVEL	= (108,76)
 
+
+# Class Game
+class Game(object):
+	def __init__(self):
+		self.completed = False
+		self.level = Level()
+		return
+
+	def run(self):
+		while not self.completed:
+			self.level.run()
+
+# Class Level
+class Level(object):
+	def __init__(self, id = 1):
+		self.completed = False
+		self.id = id
+		self.map = self.load_map()
+		
+		print 'DEBUG g.render_map_dict(self.map)'
+		g.render_map_dict(self.map)
+
+	def load_map(self):
+		return load_map_as_dict(load_map(self.id))
+
+	def run(self):
+		self.loop()
+		self.render()
+
+	def loop(self):
+		while not self.completed:
+			for x,y in self.map:
+				bck, obj = map[x,y]
+				if obj:
+					obj.run()
+
+	def render(self):
+		(x,y) = self.map_size(map)
+		for xi in range(x+1):
+			for yi in range(y+1):
+				print self.map[xi, yi]
+			print ''
+
+	def map_size(self):
+		(x,y) = (0,0)
+		for (xi, yi) in self.map:
+			if x < xi:
+				x = xi
+			if y < yi:
+				y = yi
+		return (x,y)
+
+
+
+
+
+
+
+
+
+
+
+
+
+"""
 class Level(object):
 	def __init__(self, floor=1):
 		self.floor = floor
@@ -41,6 +106,7 @@ class Level(object):
 
 	def action_key(self, key):
 		action_key(key, self.map_dict)
+"""
 
 # Returns int value of key pressed.
 def read_key():
@@ -220,4 +286,6 @@ def main():
 			if key in KEY_LEVEL: level.completed = True
 
 if __name__ == '__main__':	
+	game = Game()
+	game.run()
 	main()
