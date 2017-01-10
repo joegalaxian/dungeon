@@ -3,7 +3,13 @@
 import os
 
 def clear():
-	os.system("clear")
+	n = os.name
+	if n == 'nt':
+		os.system('clear') 
+	if n == 'posix':
+		print '\033c'
+	else:
+		system('clear')
 
 # print(chr(27) + "[2J") #clears screen up to this line
 

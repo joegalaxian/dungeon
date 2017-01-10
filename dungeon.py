@@ -108,16 +108,16 @@ class Level(object):
 		for xi in range(x):
 			for yi in range(y):
 				print self.map_matrix[xi, yi],
-			print ''
+			print '\r'
 
 
 	def print_status(self):
-		print "Dungeon.py v01"
+		print 'Dungeon.py v01 \r'
 		#print "time......:", time
-		print "floor.....:", self.floor_no
-		print "player....:", get_key(self.map_matrix, 'P')
+		print "floor.....:", self.floor_no, '\r'
+		print "player....:", get_key(self.map_matrix, 'P'), '\r'
 		#print "key.......:", key
-		print "map_size..:", self.map_size()
+		print "map_size..:", self.map_size(), '\r'
 
 
 	def map_size(self):
