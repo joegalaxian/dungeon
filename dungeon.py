@@ -26,54 +26,108 @@ KEY_LEVEL	= (108,76)
 
 # Class Game
 class Game(object):
+
 	def __init__(self):
-		self.completed = False
+		self.is_completed = False
 		self.level = Level()
 		return
 
 	def run(self):
-		while not self.completed:
+		while not self.is_completed:
 			self.level.run()
+
 
 # Class Level
 class Level(object):
-	def __init__(self, id = 1):
-		self.completed = False
-		self.id = id
-		self.map = self.load_map()
-		
-		print 'DEBUG g.render_map_dict(self.map)'
-		g.render_map_dict(self.map)
 
-	def load_map(self):
-		return load_map_as_dict(load_map(self.id))
+	def __init__(self, n = 1):
+		self.is_completed = False
+		self.floor_no = n
+		self.map_matrix = self.load_map_matrix()
+
+	def load_map_matrix(self):
+		return self.load_map_as_dict(self.load_map_file())
+
+	# Loads map as list of strings from file.
+	def load_map_file(self):
+		map_file_path = 'maps/' + str(self.floor_no) + '.map'
+		map_file = open(map_file_path, 'r')
+		m = map_file.readlines()
+		map_file.close()
+		return m
+
+	# Loads map as dictionary from list of strings. Dictionary structure: m{(x,y): 'c'}
+	def load_map_as_dict(self, lst_lines):
+		m_dict = {}
+
+		x = len(lst_lines)
+		y = len(lst_lines[0])-1
+		
+		print '>DEGUG x,y (lst_lines):', (x,y)
+		for xi in range(x):
+			for yi in range(y):
+				"""
+				# TODO:
+				x = lst_lines[xi][yi]
+				if x in OBJECTS:
+					new_obj = Object((xi, yi), x)
+					self.objects.append(new_obj);
+					matrix_map[xi,yi] = '.' #EMPTY_SPACE
+				else:
+					matrix_map[xi,yi] = x #char read from file
+				"""
+				m_dict[xi,yi] = lst_lines[xi][yi]
+
+		return m_dict
+
 
 	def run(self):
-		self.loop()
 		self.render()
+		self.tick()
+		#self.render()
+		
 
-	def loop(self):
-		while not self.completed:
-			for x,y in self.map:
-				bck, obj = map[x,y]
-				if obj:
-					obj.run()
+	def tick(self):
+		# Read and action key:
+		key = read_key()
+		action_key(key, self.map_matrix)
+
+		"""
+		# TODO:
+		from obj in self.objects:
+			obj.run()
+		"""
+
 
 	def render(self):
-		(x,y) = self.map_size(map)
-		for xi in range(x+1):
-			for yi in range(y+1):
-				print self.map[xi, yi]
+		# Clears screen, prints status, and prints the map.
+		g.clear()
+		self.print_status()
+
+		(x,y) = self.map_size()
+		for xi in range(x):
+			for yi in range(y):
+				print self.map_matrix[xi, yi],
 			print ''
+
+
+	def print_status(self):
+		print "Dungeon.py v01"
+		#print "time......:", time
+		print "floor.....:", self.floor_no
+		print "player....:", get_key(self.map_matrix, 'P')
+		#print "key.......:", key
+		print "map_size..:", self.map_size()
+
 
 	def map_size(self):
 		(x,y) = (0,0)
-		for (xi, yi) in self.map:
+		for (xi, yi) in self.map_matrix:
 			if x < xi:
 				x = xi
 			if y < yi:
 				y = yi
-		return (x,y)
+		return (x+1,y+1)
 
 
 
@@ -87,26 +141,9 @@ class Level(object):
 
 
 
-"""
-class Level(object):
-	def __init__(self, floor=1):
-		self.floor = floor
-		m = load_map(floor)
-		self.map_dict = load_map_as_dict(m)
-		self.player = get_key(self.map_dict, 'P')
-		self.switch = get_key(self.map_dict, 's')
-		self.completed = False
-		self.switch_pressed = False
 
-	def player(self):
-		return get_key(self.map_dict, 'P')
 
-	def map_size(self):
-		return '(TO,DO)'
 
-	def action_key(self, key):
-		action_key(key, self.map_dict)
-"""
 
 # Returns int value of key pressed.
 def read_key():
@@ -116,6 +153,7 @@ def read_key():
 	c = sys.stdin.read(1)
 	termios.tcsetattr(sys.stdin, termios.TCSADRAIN, attr)
 	return ord(c[0])
+
 
 def new_position((x,y), k):
 	if k in KEY_UP:
@@ -137,7 +175,7 @@ def action_key(k, m):
 		terminate()
 
 	# If hit the wall then ring.
-	if k in (KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT):	
+	if k in (KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT):
 		nx, ny = new_position((px,py), k)
 
 		if m[nx,ny] == 'X':
@@ -152,7 +190,7 @@ def action_key(k, m):
 		if m[px-1, py] == '.':
 			m[px-1, py] = 'P'
 			m[px, py] = '.'
-	
+
 	# KEY_LEFT:
 	if k in KEY_LEFT:
 		# If empty space then move there.
@@ -165,7 +203,7 @@ def action_key(k, m):
 		# If empty space then move there.
 		if m[px+1,py] == '.':
 			m[px+1,py] = 'P'
-			m[px,py] = '.'	
+			m[px,py] = '.'
 
 	# KEY_RIGHT:
 	if k in KEY_RIGHT:
@@ -193,8 +231,12 @@ def action_key(k, m):
 		#print "Press any key to resume game."
 		#read_key()
 
+	if k in KEY_LEVEL:
+		self.is_completed = True
+
 	else:
 		None
+
 
 # Terminates game printing a message, 'Game terminated.' by default.
 def terminate(str = "Game terminated."):
@@ -208,49 +250,15 @@ def locate_player(m):
 			if m[x][y] == 'P':
 				return (x,y)
 
+
 # Returns position (x,y) of the player on the dictionary map.
 def get_key(dic, value):
 	for (k, v) in dic.iteritems():
 		if v == value:
 			return k
 
-# Loads map as list of strings from file.
-def load_map(level):
-	map_file_path = 'maps/' + str(level) + '.map'
-	map_file = open(map_file_path, 'r')
-	m = map_file.readlines()
-	map_file.close()
-	return m
-
-# Loads map as dictionary from list of strings. Dictionary structure: m{(x,y): 'c'}
-def load_map_as_dict(m):
-	m_dict = {}
-	mx = len(m)
-	my = len(m[0])
-	#print 'DEBUG mx,my: ', mx, my
-	for x in range(len(m)):
-		for y in range(len(m[0])-1):
-			m_dict[(x,y)] = m[x][y]
-	#print 'DEBUG %r' % m_dict
-	return m_dict
 
 """
-# Todo: move this to grahp.py
-def render_map_dict(m_dict):
-	(x,y) = (0,0)
-	#x = 0
-	#y = 0
-	for (xi,yi) in m_dict:	
-		if x < xi:
-			x = xi
-		if y < yi:
-			y = yi
-	for xi in range(x+1):
-		for yi in range(y+1):
-			print m_dict[(xi,yi)],
-		print ''
-"""
-
 # Main function.
 def main():
 	key = None
@@ -265,27 +273,21 @@ def main():
 		level = Level(floor)
 
 		# Loop on level.
-		while not level.completed:
+		while not level.is_completed:
 
-			# Render game:
-			g.clear()
-			print "Dungeon.py v01"
-			print "time......:", time
-			print "floor.....:", level.floor
-			print "player....:", get_key(level.map_dict, 'P')
-			print "key.......:", key
-			#print "map_size..:", level.map_size()
 			g.render_map_dict(level.map_dict)
-			
+
 			# Read and action key:
 			key = read_key()
 			#action_key(key, level.map_dict)
 			level.action_key(key)
 			time += 1
-			
-			if key in KEY_LEVEL: level.completed = True
 
-if __name__ == '__main__':	
+			if key in KEY_LEVEL: level.completed = True
+"""
+
+
+if __name__ == '__main__':
 	game = Game()
 	game.run()
-	main()
+	#main()

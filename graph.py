@@ -14,7 +14,6 @@ def print_map(m):
 
 # Todo: move this to grahp.py
 def render_map_dict(m_dict):
-	print '>g.render_map_dict'
 	(x,y) = (0,0)
 	#x = 0
 	#y = 0
@@ -26,5 +25,4 @@ def render_map_dict(m_dict):
 	for xi in range(x+1):
 		for yi in range(y+1):
 			print m_dict[(xi,yi)],
-		print ''
-
+		print '' 	
