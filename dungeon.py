@@ -1,13 +1,11 @@
-# My modules.i
+# My modules.
 import graph as g
-
-# Import for chararray.
-# import numpy as np
 
 # Import for the key press.
 import sys
 import termios
 import tty
+
 
 # Key values constants.
 KEY_ESC		= (27, 113, 81)
@@ -19,7 +17,7 @@ KEY_ENTER	= (13)
 KEY_YES		= (121, 89)
 KEY_NO		= (110, 78)
 KEY_SPACE	= (32, None) #Hack: None added for using "in KEY_SPACE"
-KEY_TAB		= (9, None)
+KEY_TAB		= (9)
 KEY_HELP	= (104,72)
 KEY_LEVEL	= (108,76)
 
@@ -52,8 +50,10 @@ class Level(object):
 		self.floor_no = n
 		self.map_matrix = self.load_map_matrix()
 
+
 	def load_map_matrix(self):
 		return self.load_map_as_dict(self.load_map_file())
+
 
 	# Loads map as list of strings from file.
 	def load_map_file(self):
@@ -152,7 +152,6 @@ class Level(object):
 		return ord(k[0])
 
 
-
 	# Action key (i.e. move player, help menu, quit game, etc).
 	def action_key(self, k):
 
@@ -164,50 +163,58 @@ class Level(object):
 		switch = self.get_map_position('s')	# Switch
 		exit = self.get_map_position('_')	# Exit
 		
-		
 		# If ESC, Q, q pressed then terminate:
 		if k in KEY_ESC:
 			terminate()
 
-		# If moves towards the exit then enter new level.
-		#if (nx, ny) == exit:
-		if self.map_matrix[(nx, ny)] == '_':
-			self.next_level()
-	
-		# If moves towards the wall then ring.
-		if self.map_matrix[nx,ny] == 'X':
-			print '\a'
-
-		# If moves towards hit an empty space
-		if self.map_matrix[(nx, ny)] == '.':
-			self.map_matrix[nx, ny] = 'P'
-			self.map_matrix[px, py] = '.'
-
 		# KEY_SPACE:
-		if k in KEY_SPACE:
+		elif k in KEY_SPACE:
 			return	# Wait a turn.
 	
 		# KEY_YES:
-	
+		elif k in KEY_YES:
+			pass
+
 		# KEY_NO:
+		elif k in KEY_NO:
+			pass
 	
 		# KEY_TAB:
-	
+		elif k == KEY_TAB:
+			terminate('TAB')
+			pass
+
 		# KEY_HELP:
-		if k in KEY_HELP:
+		elif k in KEY_HELP:
 			print "Help:\r"
 			print "[W,A,S,D]...Move player.\r"
 			print "[ESC,Q].....Terminate game.\r"
 			print "[SPACE].....Wait a turn.\r"
 			#print "Press any key to resume game."
 			#read_key()
-	
-		if k in KEY_LEVEL:
-			#self.is_completed = True
+
+		# KEY_LEVEL	
+		elif k in KEY_LEVEL:
 			self.next_level()
+
+		# KEY_UP, KEY_DOWN, KEY_LEFT, KEY_RIGHT
+		elif k in KEY_UP or k in  KEY_DOWN or k in KEY_LEFT or k in KEY_RIGHT:
+			# If moves towards the exit then enter new level.
+			#if (nx, ny) == exit:
+			if self.map_matrix[(nx, ny)] == '_':
+				self.next_level()
+		
+			# If moves towards the wall then ring.
+			elif self.map_matrix[nx,ny] == 'X':
+				print '\a'
 	
+			# If moves towards hit an empty space
+			elif self.map_matrix[(nx, ny)] == '.':
+				self.map_matrix[nx, ny] = 'P'
+				self.map_matrix[px, py] = '.'
+
 		else:
-			None
+			self.run()
 
 
 	# Returns position (x,y) of the valuer on the map matrix.
@@ -215,6 +222,7 @@ class Level(object):
 		for (k, v) in self.map_matrix.iteritems():
 			if v == value:
 				return k
+
 
 	# Return the new (desired) player position after the key pressed.
 	def new_position(self, k):
@@ -242,6 +250,8 @@ class Level(object):
 def terminate(str = "Game terminated."):
 	print str
 	quit()
+
+
 
 
 if __name__ == '__main__':
