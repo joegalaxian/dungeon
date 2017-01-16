@@ -9,17 +9,17 @@ import tty
 
 # Key values constants.
 KEY_ESC		= (27, 113, 81)
-KEY_UP		= (119, 87)
-KEY_LEFT	= (97, 65)
-KEY_DOWN	= (115, 83)
-KEY_RIGHT	= (100, 68)
+KEY_UP		= (ord('W'), ord('w'))
+KEY_LEFT	= (ord('A'), ord('a'))
+KEY_DOWN	= (ord('S'), ord('s'))
+KEY_RIGHT	= (ord('D'), ord('d'))
 KEY_ENTER	= (13)
-KEY_YES		= (121, 89)
-KEY_NO		= (110, 78)
+KEY_YES		= (ord('Y'), ord('y'))
+KEY_NO		= (ord('N'), ord('n'))
 KEY_SPACE	= (32, None) #Hack: None added for using "in KEY_SPACE"
 KEY_TAB		= (9)
-KEY_HELP	= (104,72)
-KEY_LEVEL	= (108,76)
+KEY_HELP	= (ord('H'), ord('h'))
+KEY_LEVEL	= (ord('L'), ord('l'))
 
 
 # Class Game
